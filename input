@@ -1,1 +1,0 @@
-{"budget": 50000, "stocks": [{"name": "stock_1", "price": 500, "probability": 0.47, "incoming": 10000, "count": 102}, {"name": "stock_2", "price": 1500, "probability": 0.88, "incoming": 1800, "count": 150}]}

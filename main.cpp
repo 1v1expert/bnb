@@ -28,7 +28,7 @@ using std::make_unique;
 
 enum class WorkingMode
 {
-    Help, InputPath, OutputPath, Test
+    Help, InputPath, OutputPath, JsonFormat, CsvFormat, Test
 };
 
 struct ParametersProcessor
@@ -51,6 +51,14 @@ struct ParametersProcessor
             {
                 input_map[WorkingMode::OutputPath] = { argv[i + 1] };
             }
+            else if (strcmp(argv[i], "--json-format") == 0 && i + 1 < argc)
+            {
+                input_map[WorkingMode::JsonFormat] = "";
+            }
+            else if (strcmp(argv[i], "--csv-format") == 0 && i + 1 < argc)
+            {
+                input_map[WorkingMode::CsvFormat] = "";
+            }
             else if (strcmp(argv[i], "--test") == 0)
             {
                 input_map[WorkingMode::Test] = "";
@@ -64,8 +72,10 @@ struct ParametersProcessor
     {
         stream << "Available options:\n"
                << "--help (Print available options)\n"
-               << "--input [path] (Input path for csv file)\n"
-               << "--output [path] (Output path (task solution))\n"
+               << "--input [path] (Input path for file)\n"
+               << "--output [path] (Output path for file (task solution))\n"
+               << "--csv-format (Csv format of input / output file [DEFAULT])\n"
+               << "--json-format (Json format of input / output file)\n"
                << "--test (Run unit tests)\n";
         return stream;
     }
@@ -110,12 +120,28 @@ int main(int argc, char ** argv)
                 return -1;
             }
 
-            auto data_context = make_unique<bnb::DataContext<bnb::Input, bnb::Output>>();
-            data_context->InputDataLoad<bnb::JsonDeserializer>(input_file);
-            bnb::Bnb b;
-            data_context->Mutate(b);
-            data_context->OutputDataSave<bnb::JsonSerializer>(cout);
-            data_context->OutputDataSave<bnb::JsonSerializer>(output_file);
+            if (ParametersProcessor::input_map.count(WorkingMode::JsonFormat))
+            {
+                auto data_context = make_unique<bnb::DataContext<bnb::Input, bnb::Output>>();
+                data_context->InputDataLoad<bnb::JsonDeserializer<bnb::Input>>(input_file);
+
+                bnb::Bnb b;
+                data_context->Mutate(b);
+
+                data_context->OutputDataSave<bnb::JsonSerializer>(cout);
+                data_context->OutputDataSave<bnb::JsonSerializer>(output_file);
+            }
+            else
+            {
+                auto data_context = make_unique<bnb::DataContext<bnb::Input, bnb::Output>>();
+                data_context->InputDataLoad<bnb::CsvDeserializer<bnb::Input>>(input_file);
+
+                bnb::Bnb b;
+                data_context->Mutate(b);
+
+                data_context->OutputDataSave<bnb::CsvSerializer>(cout);
+                data_context->OutputDataSave<bnb::CsvSerializer>(output_file);
+            }
         }
         else
         {

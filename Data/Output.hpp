@@ -13,6 +13,7 @@ namespace bnb
     {
         double max_incoming;
         double stocks_price;
+        double probability;
         vector<tuple<Stock, uint32_t>> stocks;
     };
 }

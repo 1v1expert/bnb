@@ -19,9 +19,7 @@ namespace bnb
         template<typename Deserializer_t>
         Input_t& InputDataLoad(istream& stream)
         {
-//            input_data = Deserializer_t{}.operator()<Input_t>(stream);
-//            return input_data;
-
+            input_data = Deserializer_t{}.operator()(stream);
             return input_data;
         }
 

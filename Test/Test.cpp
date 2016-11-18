@@ -59,6 +59,7 @@ namespace bnb
         describe("Output test", [](){
             Output output = {546510.,
                              78415.,
+                             0.48,
                              {
                                  make_tuple<Stock, uint32_t>({"stock_1", 54., 0.25f, 658.}, 200),
                                  make_tuple<Stock, uint32_t>({"stock_2", 86., 0.45f, 477.}, 100),
@@ -105,16 +106,17 @@ namespace bnb
             });
         });
 
-        describe("Serializer test", [&](){
+        describe("Json serializer test", [&](){
             Output output = {546510.,
                              78415.,
+                             0.48,
                              {
-                                     make_tuple<Stock, uint32_t>({"stock_1", 54., 0.25f, 658.}, 200),
-                                     make_tuple<Stock, uint32_t>({"stock_2", 86., 0.45f, 477.}, 100),
-                                     make_tuple<Stock, uint32_t>({"stock_3", 91., 0.63f, 148.}, 50)
+                                 make_tuple<Stock, uint32_t>({"stock_1", 54., 0.25f, 658.}, 200),
+                                 make_tuple<Stock, uint32_t>({"stock_2", 86., 0.45f, 477.}, 100),
+                                 make_tuple<Stock, uint32_t>({"stock_3", 91., 0.63f, 148.}, 50)
                              }};
 
-            it("Check json deserializer", [&](){
+            it("Check json serializer", [&](){
                 stringstream result;
                 JsonSerializer{}(result, output);
 
@@ -135,7 +137,23 @@ namespace bnb
             });
         });
 
-        describe("Deserializer test", [&](){
+        describe("Csv serializer test", [&](){
+            Output output = {546510.,
+                             78415.,
+                             0.48,
+                             {
+                                 make_tuple<Stock, uint32_t>({"stock_1", 54., 0.25f, 658.}, 200),
+                                 make_tuple<Stock, uint32_t>({"stock_2", 86., 0.45f, 477.}, 100),
+                             }};
+
+            it("Check csv serializer", [&](){
+                stringstream result;
+                CsvSerializer{}(result, output);
+                AssertThat(result.str(), Equals("546510\n78415\n0.48\nstock_1;200\nstock_2;100\n"));
+            });
+        });
+
+        describe("Json deserializer test", [&](){
             stringstream json_stream(R"(
             {
                 "budget": 50000,
@@ -143,8 +161,39 @@ namespace bnb
                            {"name": "stock_2", "price": 1500, "probability": 0.88, "incoming": 1800, "count": 150}]
             })");
 
-            it("Check json serializer", [&](){
-                Input inputData = JsonDeserializer{}.operator()<Input>(json_stream);
+            it("Check json deserializer", [&](){
+                Input inputData = JsonDeserializer<Input>{}(json_stream);
+                AssertThat(inputData.budget, EqualsWithDelta(50000.,
+                                                             numeric_limits<double>::epsilon()));
+                AssertThat(inputData.stocks.size(), Equals(2));
+
+
+                AssertThat(get<0>(inputData.stocks[0]).name, Equals("stock_1"));
+                AssertThat(get<0>(inputData.stocks[0]).price, EqualsWithDelta(500.,
+                                                                              numeric_limits<double>::epsilon()));
+                AssertThat(get<0>(inputData.stocks[0]).probability, EqualsWithDelta(0.47,
+                                                                                    0.001));
+                AssertThat(get<0>(inputData.stocks[0]).incoming, EqualsWithDelta(10000.,
+                                                                                 numeric_limits<double>::epsilon()));
+                AssertThat(get<1>(inputData.stocks[0]), Equals(102));
+
+
+                AssertThat(get<0>(inputData.stocks[1]).name, Equals("stock_2"));
+                AssertThat(get<0>(inputData.stocks[1]).price, EqualsWithDelta(1500.,
+                                                                              numeric_limits<double>::epsilon()));
+                AssertThat(get<0>(inputData.stocks[1]).probability, EqualsWithDelta(0.88,
+                                                                                    0.001));
+                AssertThat(get<0>(inputData.stocks[1]).incoming, EqualsWithDelta(1800.,
+                                                                                 numeric_limits<double>::epsilon()));
+                AssertThat(get<1>(inputData.stocks[1]), Equals(150));
+            });
+        });
+
+        describe("Csv deserializer test", [&](){
+            stringstream json_stream("50000\nstock_1;500;0.47;10000;102\nstock_2;1500;0.88;1800;150");
+
+            it("Check csv deserializer", [&](){
+                Input inputData = CsvDeserializer<Input>{}(json_stream);
                 AssertThat(inputData.budget, EqualsWithDelta(50000.,
                                                              numeric_limits<double>::epsilon()));
                 AssertThat(inputData.stocks.size(), Equals(2));

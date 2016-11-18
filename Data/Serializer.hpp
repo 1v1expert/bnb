@@ -24,6 +24,7 @@ namespace bnb
             json j;
             j["max_incoming"] = output.max_incoming;
             j["stocks_price"] = output.stocks_price;
+            j["probability"] = output.probability;
             for (auto& stock : output.stocks)
             {
                 json stock_j;
@@ -32,6 +33,19 @@ namespace bnb
                 j["stocks"].push_back(stock_j);
             }
             stream << j;
+        }
+    };
+
+    struct CsvSerializer
+    {
+        template<typename OutputData>
+        void operator()(ostream& stream, OutputData& output)
+        {
+            stream << output.max_incoming << '\n';
+            stream << output.stocks_price << '\n';
+            stream << output.probability << '\n';
+            for (auto& stock : output.stocks)
+                stream << get<0>(stock).name << ';' << get<1>(stock) << '\n';
         }
     };
 }

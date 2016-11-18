@@ -22,10 +22,18 @@ Input (json):
                    }
                ]
 }
+
+Input (csv):
+50000
+stock_1;500;0.47;10000;102
+stock_2;1500;0.88;1800;150
+
+
 Output (json):
 {
     'max_incoming':   1510021
     'stocks_price':   498713
+    'probability':    0.45
     'stocks':         [
                           {
                               name:   'stock_1'
@@ -38,3 +46,9 @@ Output (json):
                       ]
 }
 
+Output (csv):
+1510021
+498713
+0.45
+stock_1;102
+stock_2;245
