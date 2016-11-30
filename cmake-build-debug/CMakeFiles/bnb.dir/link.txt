@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++14 -g   CMakeFiles/bnb.dir/main.cpp.o CMakeFiles/bnb.dir/Test/Test.cpp.o  -o bnb -rdynamic 
